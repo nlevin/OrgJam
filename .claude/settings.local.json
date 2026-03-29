@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__generate_figma_design",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k, list\\(v.keys\\(\\)\\) if isinstance\\(v,dict\\) else v\\) for k,v in d.items\\(\\)]\")",
+      "Bash(cat:*)",
+      "Read(//Users/noah/Downloads/figma-plugin-alpha-031326/**)"
+    ]
+  }
+}
