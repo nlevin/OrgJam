@@ -1,6 +1,6 @@
 # OrgJam
 
-A FigJam widget for building and visualizing org charts and team rosters. Drop people chips onto the canvas, connect them to show reporting structure, and use counters to keep headcount stats up to date — all without leaving FigJam.
+A [FigJam widget](https://www.figma.com/community/widget/1603937674414888435/orgjam) for building and visualizing org charts and team rosters. Drop people chips onto the canvas, connect them to show reporting structure, and use counters to keep headcount stats up to date — all without leaving FigJam.
 
 ## Widget modes
 
