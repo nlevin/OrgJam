@@ -53,6 +53,9 @@ type AvatarUploadMessage =
   | { type: 'avatar-uploaded'; dataUri: string }
   | { type: 'avatar-upload-error'; message: string }
   | { type: 'avatar-remove-image' }
+type LinkEditMessage =
+  | { type: 'link-save'; url: string }
+  | { type: 'link-cancel' }
 
 const PEOPLE_CHIP_WIDTH = 260
 const PEOPLE_CHIP_DETAILS_WIDTH = 164
@@ -158,14 +161,18 @@ function refreshIconSvg(fill: string): string {
 </svg>`
 }
 
-const ADD_ICON = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M7 1.5V12.5M1.5 7H12.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+const TOOLBAR_ICON_COLOR = '#A7A8AE'
+const LINK_ICON = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.12246 5.35035C3.70967 5.29718 4.16535 5.85058 3.84109 6.39269C3.68701 6.63352 3.44221 6.83986 3.24592 7.04265C2.35156 7.96672 1.28591 8.70535 1.39299 10.1548C1.44415 10.8475 1.7144 11.4879 2.23257 11.958C2.64677 12.3278 3.16901 12.5519 3.7206 12.5966C6.06456 12.7748 6.99864 10.1048 7.94124 10.0672C8.11707 10.0602 8.28682 10.1478 8.41128 10.2682C8.55093 10.4033 8.64159 10.593 8.64047 10.79C8.63868 11.0981 8.41314 11.302 8.21515 11.5043C7.53853 12.1888 6.73037 13.1189 5.89479 13.5403C4.875 14.0543 3.69489 14.141 2.61186 13.7816C1.65908 13.4519 0.874374 12.7557 0.428993 11.8452C-0.0572896 10.8603 -0.133474 9.72056 0.217403 8.67886C0.33225 8.32873 0.498941 7.99808 0.711947 7.69823C1.02018 7.26336 2.62075 5.57856 3.06514 5.35706C3.08414 5.35422 3.10331 5.35194 3.12246 5.35035ZM9.50159 3.64786C9.85021 3.62117 10.1332 3.80056 10.2804 4.12307C10.3339 4.22013 10.3481 4.51678 10.2816 4.60991C9.92367 5.11129 9.29651 5.6841 8.87419 6.10817L5.6311 9.37951C5.31915 9.69468 4.90772 10.1883 4.50274 10.3454C3.99895 10.4182 3.4979 9.88582 3.72286 9.38802C3.76671 9.29096 3.96731 9.06785 4.04257 8.98963C4.38325 8.63561 4.7349 8.29059 5.08114 7.94189L6.96904 6.03937C7.63591 5.36991 8.29662 4.69294 8.96791 4.02803C9.13393 3.8636 9.28283 3.73463 9.50159 3.64786ZM9.80749 0.0145755C10.4524 -0.0563199 11.2955 0.139268 11.8723 0.430699C12.7799 0.898545 13.4677 1.70851 13.7859 2.6845C14.1328 3.71924 14.0558 4.85076 13.5721 5.8282C13.0931 6.77384 11.9844 7.65572 11.2545 8.43436C10.8622 8.85291 10.1616 8.63147 10.0533 8.06018C9.97124 7.62683 10.4734 7.26495 10.7319 6.98116C11.2481 6.42485 11.9088 5.91491 12.2895 5.25495C12.881 4.15661 12.6525 2.76563 11.6774 1.97306C11.2462 1.62246 10.7135 1.42259 10.1597 1.40353C7.89993 1.32591 7.02925 3.83633 6.07332 3.92855C5.91455 3.94385 5.77037 3.89138 5.64883 3.78941C5.48655 3.65325 5.36455 3.47564 5.34886 3.25871C5.33349 3.04628 5.43901 2.8681 5.57271 2.71338C5.84333 2.40021 6.15684 2.11149 6.44833 1.8175C7.49176 0.765096 8.26819 0.12648 9.80749 0.0145755Z" fill="${TOOLBAR_ICON_COLOR}"/>
+</svg>`
+const OPEN_LINK_ICON = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.16338 0.0172543C3.64039 0.00244012 4.18212 -0.0159747 4.64173 0.0327013C5.41618 0.130634 5.43492 1.24767 4.67447 1.3862C3.8452 1.53726 2.3482 1.14755 1.72421 1.88378C1.28765 2.39892 1.39058 3.62938 1.3905 4.27952L1.39013 9.66736C1.39013 10.231 1.37846 10.7807 1.42506 11.3449C1.48123 12.0248 1.92446 12.4926 2.60621 12.5693C3.14913 12.6304 3.70966 12.6109 4.25799 12.611L9.61388 12.6113C10.195 12.6112 10.8001 12.6412 11.377 12.568C13.3392 12.319 12.1947 9.70475 12.7558 9.00046C12.8662 8.86191 13.0573 8.79826 13.2285 8.78153C13.4113 8.76365 13.6029 8.81518 13.7453 8.93283C13.9214 9.07839 13.9714 9.25809 13.9936 9.47445C14.0069 9.79167 13.996 10.2067 13.9924 10.5251C13.9815 11.4714 13.9481 12.3379 13.2722 13.0729C12.6072 13.796 11.9487 13.9528 11.0001 13.9858C10.4148 14.0062 9.81089 13.9972 9.22406 13.9974L4.05718 13.997C2.97992 13.9953 1.78126 14.0927 0.933736 13.2992C0.208461 12.6202 0.0333908 12.0302 0.0123049 11.057C-0.00153913 10.4175 0.0004112 9.77421 0.00013432 9.13231L0.000256025 3.99868C0.000809785 3.37545 -0.0133567 2.65819 0.108087 2.05309C0.254347 1.32431 0.913296 0.590609 1.57902 0.285934C2.03923 0.0753118 2.65919 0.0346438 3.16338 0.0172543ZM12.7932 0.00326689C13.2004 0.00324049 13.6457 -0.0582081 13.8866 0.353074C14.0178 0.57714 13.9776 0.925443 13.9818 1.18174C13.9863 1.46096 13.9821 1.74451 13.9823 2.02378L13.9818 5.14249C13.9814 5.48349 14.027 5.9166 13.7631 6.14739C13.6105 6.28074 13.4622 6.358 13.2568 6.35355C13.0783 6.35085 12.9088 6.27504 12.7878 6.14387C12.714 6.06302 12.6145 5.88688 12.6071 5.7763C12.5532 4.96902 12.5934 4.15255 12.5815 3.34273C12.577 3.03285 12.5766 2.70485 12.5915 2.3967C12.2948 2.65347 12.0353 2.94405 11.7522 3.21599C11.1651 3.78003 10.6064 4.39573 10.0128 4.95104C9.85398 5.09269 9.66854 5.30286 9.51287 5.45787L8.34644 6.61615C8.05581 6.90491 7.74948 7.35486 7.3055 7.33632C7.11346 7.3268 6.93344 7.23994 6.8065 7.09562C6.68367 6.95637 6.6226 6.77325 6.63721 6.58818C6.64793 6.45653 6.68742 6.34428 6.77158 6.24263C7.00411 5.96181 7.2862 5.70045 7.54526 5.44194L10.6315 2.35863C10.9079 2.08178 11.3016 1.66368 11.5892 1.41369C10.8561 1.403 10.1229 1.40078 9.38982 1.407C9.06089 1.40742 8.63666 1.42778 8.31565 1.39702C7.49264 1.31814 7.33882 0.26467 8.21622 0.0138487C8.2941 0.00676542 8.42404 0.00428332 8.50466 0.00423992C9.59569 0.00362265 10.6876 0.00507613 11.7785 0.0041183L12.7932 0.00326689Z" fill="${TOOLBAR_ICON_COLOR}"/>
 </svg>`
 
 function managerToggleIcon(mode: ManagerKind): string {
   const label = mode === 'manager' ? 'M' : 'IC'
   return `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <text x="10" y="11" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#FFFFFF">${label}</text>
+  <text x="10" y="11" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="${TOOLBAR_ICON_COLOR}">${label}</text>
 </svg>`
 }
 
@@ -332,6 +339,96 @@ const AVATAR_UPLOAD_UI_HTML = `
 </html>
 `
 
+const LINK_EDITOR_UI_HTML = `
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+      .root {
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 9px 10px;
+        font-size: 12px;
+        color: #111827;
+      }
+      .actions { display: flex; gap: 8px; }
+      button {
+        appearance: none;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      #save {
+        background: #8d46ff;
+        color: #ffffff;
+      }
+      #cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="root">
+      <input id="url" type="text" placeholder="https://example.com" />
+      <div class="actions">
+        <button id="save" type="button">Save link</button>
+        <button id="cancel" type="button">Cancel</button>
+      </div>
+    </div>
+    <script>
+      const post = (payload) => parent.postMessage({ pluginMessage: payload }, '*');
+      const input = document.getElementById('url');
+      const saveButton = document.getElementById('save');
+      const cancelButton = document.getElementById('cancel');
+
+      saveButton.addEventListener('click', () => {
+        post({ type: 'link-save', url: input.value || '' });
+      });
+      cancelButton.addEventListener('click', () => {
+        post({ type: 'link-cancel' });
+      });
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          post({ type: 'link-save', url: input.value || '' });
+        }
+      });
+      window.onmessage = (event) => {
+        const pluginMessage = event.data && event.data.pluginMessage;
+        if (!pluginMessage || pluginMessage.type !== 'link-editor-init') return;
+        input.value = pluginMessage.url || '';
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      };
+    </script>
+  </body>
+</html>
+`
+
 function roleColor(role: string): string {
   const normalized = role.trim().toLowerCase()
   if (normalized.includes('design')) return '#8F5BFF'
@@ -382,6 +479,26 @@ function textFieldWidth(
   return Math.max(minWidth, Math.min(maxWidth, estimated))
 }
 
+function fittedFontSizeForWidth(
+  value: string,
+  placeholder: string,
+  maxWidth: number,
+  baseSize: number,
+  minSize: number,
+): number {
+  const text = value.trim().length > 0 ? value.trim() : placeholder
+  if (text.length <= 1) return baseSize
+
+  // Empirical approximation for Inter width in widget inputs.
+  const charFactor = 0.56
+  const safetyPadding = 10
+  const estimatedWidthAtBase = text.length * baseSize * charFactor + safetyPadding
+  if (estimatedWidthAtBase <= maxWidth) return baseSize
+
+  const scaled = Math.floor((maxWidth - safetyPadding) / (text.length * charFactor))
+  return Math.max(minSize, Math.min(baseSize, scaled))
+}
+
 function asAvatarUploadMessage(message: unknown): AvatarUploadMessage | null {
   if (!message || typeof message !== 'object') return null
   const record = message as Record<string, unknown>
@@ -397,6 +514,24 @@ function asAvatarUploadMessage(message: unknown): AvatarUploadMessage | null {
     return { type: 'avatar-uploaded', dataUri: record.dataUri }
   }
   return null
+}
+
+function asLinkEditMessage(message: unknown): LinkEditMessage | null {
+  if (!message || typeof message !== 'object') return null
+  const record = message as Record<string, unknown>
+  const type = record.type
+  if (type === 'link-cancel') return { type: 'link-cancel' }
+  if (type === 'link-save') {
+    return { type: 'link-save', url: typeof record.url === 'string' ? record.url : '' }
+  }
+  return null
+}
+
+function normalizeExternalUrl(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) return ''
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
 }
 
 function getCenterPoint(node: SceneNode): Point {
@@ -2085,6 +2220,7 @@ function Widget() {
   )
   const [role, setRole] = useSyncedState<string>('role', defaultProfile.role)
   const [location, setLocation] = useSyncedState<string>('location', defaultProfile.location)
+  const [linkUrl, setLinkUrl] = useSyncedState<string>('link-url', '')
   const [avatarDataUri, setAvatarDataUri] = useSyncedState<string>('avatar-data-uri', '')
   const [status, setStatus] = useSyncedState<Status>('status', 'active')
   const [managerKind, setManagerKind] = useSyncedState<ManagerKind>('manager-kind', 'ic')
@@ -2118,6 +2254,7 @@ function Widget() {
   const statusStyle = STATUS_STYLES[status]
   const rolePillColor = roleColor(role)
   const nameFieldWidth = textFieldWidth(name, 'Name', 120, 156, 8.2)
+  const nameFieldFontSize = fittedFontSizeForWidth(name, 'Name', nameFieldWidth, 17, 13)
   const projectAreaFieldWidth = textFieldWidth(projectArea, 'Project Area', 112, 156, 6.3)
   const locationFieldWidth = textFieldWidth(location, 'Location', 78, 116, 5.8)
   const counterCardStyle =
@@ -2187,6 +2324,38 @@ function Widget() {
     })
   }
 
+  const editChipLink = async () => {
+    figma.showUI(LINK_EDITOR_UI_HTML, {
+      width: 360,
+      height: 150,
+      title: 'People chip link',
+    })
+    figma.ui.postMessage({ type: 'link-editor-init', url: linkUrl })
+
+    await new Promise<void>((resolve) => {
+      let done = false
+      const finish = () => {
+        if (done) return
+        done = true
+        figma.ui.onmessage = undefined
+        figma.ui.close()
+        resolve()
+      }
+
+      figma.ui.onmessage = (message: unknown) => {
+        const parsed = asLinkEditMessage(message)
+        if (!parsed) return
+        if (parsed.type === 'link-cancel') {
+          finish()
+          return
+        }
+        const normalized = normalizeExternalUrl(parsed.url)
+        setLinkUrl(normalized)
+        finish()
+      }
+    })
+  }
+
   const refreshCount = async (presetOverride?: CounterPreset, peopleFilterOverride?: CounterPeopleFilter) => {
     const effectivePreset = presetOverride ?? counterPreset
     const effectivePeopleFilter = peopleFilterOverride ?? counterPeopleFilter
@@ -2235,6 +2404,7 @@ function Widget() {
       'project-area': nextProfile.projectArea,
       role: nextProfile.role,
       location: nextProfile.location,
+      'link-url': '',
       'avatar-data-uri': '',
       status: 'active',
       'manager-kind': 'ic',
@@ -2284,6 +2454,7 @@ function Widget() {
         'project-area': profile.projectArea,
         role: profile.role || 'Eng',
         location: profile.location,
+        'link-url': '',
         'avatar-data-uri': '',
         status: profile.status,
         'manager-kind': 'ic',
@@ -2331,6 +2502,7 @@ function Widget() {
         'project-area': card.profile.projectArea,
         role: card.profile.role || 'Eng',
         location: card.profile.location,
+        'link-url': '',
         'avatar-data-uri': '',
         status: card.profile.status,
         'manager-kind': 'ic',
@@ -2525,12 +2697,23 @@ function Widget() {
             tooltip: '',
             icon: managerToggleIcon(managerKind),
           },
+          { itemType: 'separator' },
           {
             itemType: 'action',
-            propertyName: 'spawn-widget',
+            propertyName: 'edit-link',
             tooltip: '',
-            icon: ADD_ICON,
+            icon: LINK_ICON,
           },
+          ...(linkUrl.trim().length > 0
+            ? [
+                {
+                  itemType: 'action',
+                  propertyName: 'open-link',
+                  tooltip: '',
+                  icon: OPEN_LINK_ICON,
+                } satisfies WidgetPropertyMenuItem,
+              ]
+            : []),
         ]
       : widgetKind === 'counter'
         ? [
@@ -2547,12 +2730,6 @@ function Widget() {
               tooltip: '',
               selectedOption: counterPeopleFilter,
               options: COUNTER_PEOPLE_FILTER_OPTIONS,
-            },
-            {
-              itemType: 'action',
-              propertyName: 'spawn-widget',
-              tooltip: '',
-              icon: ADD_ICON,
             },
           ]
         : []
@@ -2594,8 +2771,15 @@ function Widget() {
         setManagerKind(managerKind === 'manager' ? 'ic' : 'manager')
         return
       }
-      if (event.propertyName === 'spawn-widget') {
-        await spawnNewWidgetInstance()
+      if (event.propertyName === 'edit-link') {
+        await editChipLink()
+        return
+      }
+      if (event.propertyName === 'open-link') {
+        const url = normalizeExternalUrl(linkUrl)
+        if (!url) return
+        figma.openExternal(url)
+        return
       }
     },
   )
@@ -2986,7 +3170,7 @@ function Widget() {
             onTextEditEnd={(e) => setName(e.characters || '')}
             inputFrameProps={{ name: 'OrgJam/NameField' }}
             fontWeight={status === 'active' ? 700 : 500}
-            fontSize={17}
+            fontSize={nameFieldFontSize}
             fill={'#111827'}
             inputBehavior={'truncate'}
             placeholder={'Name'}
