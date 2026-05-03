@@ -3,7 +3,7 @@ const { usePropertyMenu, useSyncedState, useWidgetNodeId, waitForTask, AutoLayou
 
 type WidgetKind = 'chooser' | 'people-chip' | 'counter' | 'bulk-create'
 
-type Status = 'active' | 'open-headcount' | 'new-headcount'
+type Status = 'active' | 'open-headcount' | 'new-headcount' | 'soon-headcount'
 type CounterPreset = 'all' | 'locations' | Status
 type ManagerKind = 'ic' | 'manager'
 type CounterPeopleFilter = 'all' | 'ics' | 'managers'
@@ -71,6 +71,7 @@ const STATUS_OPTIONS: Array<{ option: Status; label: string }> = [
   { option: 'active', label: 'Active' },
   { option: 'open-headcount', label: 'Open' },
   { option: 'new-headcount', label: 'New' },
+  { option: 'soon-headcount', label: 'Soon' },
 ]
 
 const ROLE_OPTIONS: Array<{ option: string; label: string }> = [
@@ -90,6 +91,7 @@ const COUNTER_PRESET_OPTIONS: Array<{ option: CounterPreset; label: string }> = 
   { option: 'active', label: 'Active' },
   { option: 'open-headcount', label: 'Open' },
   { option: 'new-headcount', label: 'New' },
+  { option: 'soon-headcount', label: 'Soon' },
   { option: 'locations', label: 'Locations' },
 ]
 
@@ -99,6 +101,7 @@ const COUNTER_PRESET_LABEL: Record<CounterPreset, string> = {
   active: 'Active',
   'open-headcount': 'Open',
   'new-headcount': 'New',
+  'soon-headcount': 'Soon',
 }
 
 const COUNTER_PEOPLE_FILTER_OPTIONS: Array<{ option: CounterPeopleFilter; label: string }> = [
@@ -141,6 +144,14 @@ const STATUS_STYLES: Record<
     avatarFill: '#FFEFC1',
     avatarStroke: '#E9D899',
     avatarText: '#CDAD4D',
+  },
+  'soon-headcount': {
+    label: 'Soon',
+    cardFill: '#F6F9FF',
+    cardStroke: '#C4D6F7',
+    avatarFill: '#EEF4FF',
+    avatarStroke: '#C1D1FA',
+    avatarText: '#6A80BD',
   },
 }
 
@@ -676,18 +687,18 @@ function buildCounterRoleDetails(widgets: WidgetNode[]): CounterRoleDetail[] {
 
   const buckets: Record<
     'Design' | 'Eng' | 'PM' | 'TPM' | 'Ops' | 'Brand' | 'Writing' | 'Research' | 'Data' | 'Other',
-    { count: number; active: number; open: number; newCount: number }
+    { count: number; active: number; open: number; newCount: number; soon: number }
   > = {
-    Design: { count: 0, active: 0, open: 0, newCount: 0 },
-    Eng: { count: 0, active: 0, open: 0, newCount: 0 },
-    PM: { count: 0, active: 0, open: 0, newCount: 0 },
-    TPM: { count: 0, active: 0, open: 0, newCount: 0 },
-    Ops: { count: 0, active: 0, open: 0, newCount: 0 },
-    Brand: { count: 0, active: 0, open: 0, newCount: 0 },
-    Writing: { count: 0, active: 0, open: 0, newCount: 0 },
-    Research: { count: 0, active: 0, open: 0, newCount: 0 },
-    Data: { count: 0, active: 0, open: 0, newCount: 0 },
-    Other: { count: 0, active: 0, open: 0, newCount: 0 },
+    Design: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Eng: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    PM: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    TPM: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Ops: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Brand: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Writing: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Research: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Data: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
+    Other: { count: 0, active: 0, open: 0, newCount: 0, soon: 0 },
   }
 
   for (const widgetNode of widgets) {
@@ -697,6 +708,7 @@ function buildCounterRoleDetails(widgets: WidgetNode[]): CounterRoleDetail[] {
     bucket.count += 1
     if (statusValue === 'active') bucket.active += 1
     else if (statusValue === 'open-headcount') bucket.open += 1
+    else if (statusValue === 'soon-headcount') bucket.soon += 1
     else bucket.newCount += 1
   }
 
@@ -713,6 +725,7 @@ function buildCounterRoleDetails(widgets: WidgetNode[]): CounterRoleDetail[] {
       if (bucket.active > 0) parts.push(`${bucket.active} Active`)
       if (bucket.open > 0) parts.push(`${bucket.open} Open`)
       if (bucket.newCount > 0) parts.push(`${bucket.newCount} New`)
+      if (bucket.soon > 0) parts.push(`${bucket.soon} Soon`)
       return {
         title: roleTitleForCounter(role, bucket.count),
         color: roleColor(role === 'Eng' ? 'Eng' : role),
@@ -763,6 +776,7 @@ function normalizeStatus(value: unknown): Status {
     .trim()
     .toLowerCase()
   if (normalized.includes('open')) return 'open-headcount'
+  if (normalized.includes('soon')) return 'soon-headcount'
   if (normalized.includes('new')) return 'new-headcount'
   return 'active'
 }
@@ -2266,6 +2280,8 @@ function Widget() {
       ? { fill: '#EDE1B9', hover: '#E4D7AD', icon: '#B7A96F' }
       : counterPreset === 'open-headcount'
         ? { fill: '#D9D9DD', hover: '#CFD0D4', icon: '#A7A8AE' }
+        : counterPreset === 'soon-headcount'
+          ? { fill: '#DCE6FF', hover: '#D0DCFA', icon: '#7B90C5' }
         : { fill: '#F1F1F1', hover: '#E3E3E3', icon: '#B0B0B4' }
 
   const uploadAvatarImage = async () => {
