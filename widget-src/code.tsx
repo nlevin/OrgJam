@@ -3236,7 +3236,11 @@ function Widget() {
         >
           <AutoLayout
             name={'OrgJam/RolePill'}
-            fill={rolePillColor}
+            fill={
+              managerKind === 'duplicate'
+                ? { type: 'solid', color: rolePillColor, opacity: 0.2 }
+                : rolePillColor
+            }
             cornerRadius={4}
             padding={{ left: 4, right: 4, top: 2, bottom: 2 }}
             horizontalAlignItems={'center'}
@@ -3248,8 +3252,8 @@ function Widget() {
               onTextEditEnd={(e) => setRole(e.characters || '')}
               inputFrameProps={{ name: 'OrgJam/RoleField' }}
               fontSize={9}
-              fontWeight={700}
-              fill={'#FFFFFF'}
+              fontWeight={managerKind === 'duplicate' ? 500 : 700}
+              fill={managerKind === 'duplicate' ? rolePillColor : '#FFFFFF'}
               inputBehavior={'truncate'}
               horizontalAlignText={'center'}
               placeholder={'Role'}

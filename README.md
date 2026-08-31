@@ -13,8 +13,8 @@ The core building block. Each chip represents one person and stores:
 - **Name** and **Project Area** — editable inline on the card
 - **Role** — choose from Design, Eng, PM, TPM, Ops, Brand, Writing, Research, or Data (color-coded pill)
 - **Location**
-- **Status** — Active (white card), Open headcount (grey card), or New headcount (yellow card)
-- **IC / Manager toggle** — marks whether the person is an individual contributor or a manager
+- **Status** — Active (white card), Open headcount (grey card), New headcount (yellow card), or Soon (blue card)
+- **IC / Manager / Duplicate toggle** — cycles between `IC`, `M`, and `D`. Duplicate cards use translucent styling so they can show repeated people in an org chart without adding them to any headcount, role, status, or location totals.
 - **Avatar** — upload a custom profile photo (PNG, JPG, WEBP, or GIF; auto-cropped to a square)
 
 Chips can be connected with FigJam connectors to show reporting lines.
@@ -25,7 +25,7 @@ A live headcount widget that scans the canvas for people chips and displays a co
 
 Configurable via the property menu:
 
-- **Preset** — Total, Active, Open, New, or Locations (number of distinct offices)
+- **Preset** — Total, Active, Open, New, Soon, or Locations (number of distinct offices)
 - **Filter** — All, ICs only, or Managers only
 
 Clicking the refresh icon re-scans the canvas and updates the number and role/location breakdown.
