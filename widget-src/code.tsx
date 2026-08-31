@@ -5,7 +5,7 @@ type WidgetKind = 'chooser' | 'people-chip' | 'counter' | 'bulk-create'
 
 type Status = 'active' | 'open-headcount' | 'new-headcount' | 'soon-headcount'
 type CounterPreset = 'all' | 'locations' | Status
-type ManagerKind = 'ic' | 'manager'
+type ManagerKind = 'ic' | 'manager' | 'duplicate'
 type CounterPeopleFilter = 'all' | 'ics' | 'managers'
 type ChipProfile = {
   name: string
@@ -181,7 +181,7 @@ const OPEN_LINK_ICON = `<svg width="14" height="14" viewBox="0 0 14 14" fill="no
 </svg>`
 
 function managerToggleIcon(mode: ManagerKind): string {
-  const label = mode === 'manager' ? 'M' : 'IC'
+  const label = mode === 'manager' ? 'M' : mode === 'duplicate' ? 'D' : 'IC'
   return `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
   <text x="10" y="11" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="400" fill="${TOOLBAR_ICON_COLOR}">${label}</text>
 </svg>`
@@ -763,10 +763,11 @@ function matchesPreset(widgetNode: WidgetNode, preset: CounterPreset): boolean {
 }
 
 function matchesPeopleFilter(widgetNode: WidgetNode, peopleFilter: CounterPeopleFilter): boolean {
-  if (peopleFilter === 'all') return true
   const managerKind = String(widgetNode.widgetSyncedState['manager-kind'] ?? '')
     .trim()
     .toLowerCase()
+  if (managerKind === 'duplicate' || managerKind === 'd') return false
+  if (peopleFilter === 'all') return true
   if (peopleFilter === 'managers') return managerKind === 'manager' || managerKind === 'm'
   return managerKind === '' || managerKind === 'ic'
 }
@@ -2784,7 +2785,7 @@ function Widget() {
         return
       }
       if (event.propertyName === 'manager-kind-toggle') {
-        setManagerKind(managerKind === 'manager' ? 'ic' : 'manager')
+        setManagerKind(managerKind === 'ic' ? 'manager' : managerKind === 'manager' ? 'duplicate' : 'ic')
         return
       }
       if (event.propertyName === 'edit-link') {
@@ -3133,15 +3134,27 @@ function Widget() {
       width={PEOPLE_CHIP_WIDTH}
       padding={16}
       cornerRadius={10}
-      fill={statusStyle.cardFill}
-      stroke={statusStyle.cardStroke}
-      effect={{
-        type: 'drop-shadow',
-        color: { r: 0, g: 0, b: 0, a: 0.12 },
-        offset: { x: 0, y: 2 },
-        blur: 4,
-        spread: 0,
-      }}
+      fill={
+        managerKind === 'duplicate'
+          ? { type: 'solid', color: '#FFFFFF', opacity: 0.2 }
+          : statusStyle.cardFill
+      }
+      stroke={
+        managerKind === 'duplicate'
+          ? { type: 'solid', color: '#000000', opacity: 0.1 }
+          : statusStyle.cardStroke
+      }
+      effect={
+        managerKind === 'duplicate'
+          ? undefined
+          : {
+              type: 'drop-shadow',
+              color: { r: 0, g: 0, b: 0, a: 0.12 },
+              offset: { x: 0, y: 2 },
+              blur: 4,
+              spread: 0,
+            }
+      }
       verticalAlignItems={'center'}
     >
       <AutoLayout
@@ -3152,8 +3165,16 @@ function Widget() {
         overflow={'hidden'}
         verticalAlignItems={'center'}
         horizontalAlignItems={'center'}
-        fill={statusStyle.avatarFill}
-        stroke={statusStyle.avatarStroke}
+        fill={
+          managerKind === 'duplicate' && !avatarDataUri
+            ? { type: 'solid', color: '#FFFFFF', opacity: 0.4 }
+            : statusStyle.avatarFill
+        }
+        stroke={
+          managerKind === 'duplicate' && !avatarDataUri
+            ? { type: 'solid', color: '#000000', opacity: 0.1 }
+            : statusStyle.avatarStroke
+        }
         onClick={() => {
           waitForTask(uploadAvatarImage())
         }}
